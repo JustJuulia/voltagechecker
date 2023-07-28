@@ -1,0 +1,12 @@
+[config0]
+limitLO = 3.05
+limitHI = 3.35
+[config1]
+limitLO = 2.87
+limitHI = 3.52
+[config2]
+limitLO = 1.87
+limitHI = 4.52
+[misc]
+portName = COM4
+mode = remote
