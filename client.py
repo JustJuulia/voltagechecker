@@ -12,6 +12,8 @@ def opennew():
     ids = 1
     def resetbut():
         global ids
+        global measurebutton
+        measurebutton.configure(state="disabled")
         changes.set_value("reset")
         sentid.set_value(ids)
         ids = ids + 1
