@@ -2,40 +2,12 @@ import customtkinter as ctk
 import serial
 import json
 from opcua import Server
-global machineState
-global remoteState
-global alarmdesc
-global id
-global newid
-global sentid
-id: int = 0
-changecmd: str = ""
-alarmdesc: str = " "
-machineState: str = "startup"
-remoteState: str = ""
-newid: str = ""
-sentid: str = ""
-cmd: str = ""
-
-global opcua_machineState
-global opcua_remoteState
-global opcua_cmd
-global opc_sentid
-global opcua_id
-global opcua_changecmd
-global opcmeasure_res
-global opcmeasure_stat
-global opclimitHI
-global opclimitLO
-global opcalarmdesc
-global measure_res
-global measure_stat
-global limitHI
-global limitLO
-measure_res: str = ""
-measure_stat: str= ""
-limitLO: str = ""
-limitHI: str= ""
+# Global variables
+machineState, remoteState, alarmdesc = "startup", "", ""
+id, newid, sentid = 0, "", ""
+changecmd, cmd = "", ""
+limitLO, limitHI, measure_res, measure_stat = "", "", "", ""
+# OPC UA Server setup
 server = Server()
 url = "opc.tcp://10.108.133.57:4840"
 server.set_endpoint(url)
@@ -44,8 +16,6 @@ addspace = server.register_namespace(name)
 node = server.get_objects_node()
 Param = node.add_object(addspace, "Parameters")
 opcua_machineState = Param.add_variable(addspace, "appState", machineState)
-opcua_machineState.set_writable()
-#adding variable to te server, where the anme of the variable is appstate with the value machineState
 opcua_cmd = Param.add_variable(addspace, "cmd", "")
 opcua_cmd.set_writable()
 opcua_id = Param.add_variable(addspace, "id", "")
@@ -75,13 +45,7 @@ def open_new_window():
     #this check will be needed later in the code, lines around 440
     global machineState
     def on_main():
-        global machineState
-        global alarmdesc
-        global id
-        global opcua_machineState
-        global opcua_cmd
-        global cmd
-        global stat
+        global machineState, alarmdesc, id, opcua_machineState, opcua_cmd, cmd, stat
         cmd = ""
         #declarations :D
         opcua_machineState.set_value(machineState)
@@ -159,10 +123,10 @@ def open_new_window():
     timecycle.configure(state="disabled")
     combobox.configure(state="disabled")
     buttons.configure(state="disabled")
+    global resetbut
     def resetbut():
         #function for button which will reset the window
-        global alarmdesc
-        global machineState
+        global alarmdesc, machineState
         machineState = "startup"
         alarmdesc = " "
         new_window.destroy()
@@ -194,11 +158,7 @@ def open_new_window():
         file_path = 'limity.txt'
         with open(file_path, 'r') as file:
             lines = file.readlines()
-        global port
-        global mode
-        global configs
-        global limitHI_list
-        global limitLO_list
+        global port, mode ,configs, limitHI_list, limitLO_list
         file_path = 'limity.txt'
         with open(file_path, 'r') as file:
             lines = file.readlines()
@@ -239,9 +199,7 @@ def open_new_window():
         checkfile = "no"
     def checktheidle():
         #this if the stateofmach function connected with the device then doidle gets the vlue yes
-        global doidle
-        global machineState
-        global alarmdesc
+        global doidle, machineState, alarmdesc
         if doidle == "yes":
             machineState = "idle"
             alarmdesc = "         "
@@ -256,9 +214,7 @@ def open_new_window():
             machineState = "alarm"
             alarmdesc = "couldnt connect with the device"
     def stateofmach():
-        global machineState
-        global doidle
-        global alarmdesc
+        global machineState, doidle, alarmdesc
         def send_command(arduino, command):
             arduino.write(command)
         try:
@@ -293,11 +249,7 @@ def open_new_window():
         def check_arduino_voltage():
 
             def voltch():
-                global response
-                global timecycle_var
-                global alarmdesc
-                global machineState
-                global arduino
+                global response, timecycle_var, alarmdesc, machineState, arduino
                 arduino = serial.Serial(port, 115200, timeout=5)
                 machineState = "busy"
                 alarmdesc = "  "
@@ -334,8 +286,7 @@ def open_new_window():
                     machineState = "alarm"
                     alarmdesc = "json decode error or value error"
                     return "Invalid response received."
-            global timecycle_var
-            global machineState
+            global timecycle_var, machineState
             return voltch()
         voltage = check_arduino_voltage()
         return voltage
@@ -343,9 +294,7 @@ def open_new_window():
 
     def startsit():
         #function after clickingthe start button
-        global machineState
-        global timecycle_var
-        global alarmdesc
+        global machineState, timecycle_var, alarmdesc
         machineState = "busy"
         alarmdesc = "  "
         print(machineState)
@@ -380,15 +329,14 @@ def open_new_window():
                     font=("Arial", 14),
                 )
                 result_text.place(x=40, y=75)
-            new_window.mainloop()
+            # new_window.mainloop()
         except Exception as e:
             machineState = "alarm"
             alarmdesc = str(e)
             print(alarmdesc)
     def asd():
         #function if someone types sleep time
-        global machineState
-        global timecycle_var
+        global machineState, timecycle_var
         machineState = "busy"
         stat.configure(text=machineState)
         print(machineState, "NEWFUN")
@@ -401,12 +349,7 @@ def open_new_window():
             new_window.after(0, startsit)
     def combobox_callback(choice):
         #fucntion after picking any choice from the combobox
-        global indx
-        global lowval
-        global highval
-        global mode
-        global machineState
-        global timecycle_var
+        global indx, lowval, highval, mode, machineState, timecycle_var
         machineState = "ready"
         indx = configs.index(choice)
         print(indx)
@@ -436,20 +379,7 @@ def open_new_window():
             buttons.configure(command=asd)
     def opcfunc():
         #function for the remote mode
-        global remoteState
-        global mode
-        global id
-        global opcua_id
-        global opcua_changecmd
-        global changecmd
-        global oldid
-        global choice
-        global counter
-        global newid
-        global opcua_remoteState
-        global remoteState
-        global opc_sentid
-        global check
+        global remoteState, mode, id, opcua_id, opcua_changecmd, changecmd, oldid, choice, counter, newid, opcua_remoteState, remoteState, opc_sentid, check
         id = opcua_id.get_value()
         if mode == "remote":
             if id != "":
@@ -457,7 +387,7 @@ def open_new_window():
                     if newid != id:
                         newid = id
                         changecmd = opcua_changecmd.get_value()
-                        if changecmd == "cfg1" or changecmd == "cfg2" or changecmd == "cfg3" or changecmd == "measure":
+                        if changecmd == "cfg1" or changecmd == "cfg2" or changecmd == "cfg3" or changecmd == "measure" or changecmd == "reset":
                             #checking if the command that user typed is correct
                             remoteState = "ok"
                             opcua_remoteState.set_value(remoteState)
@@ -466,13 +396,12 @@ def open_new_window():
                                 if check == "y":
                                     startsit()
                                 else:
-                                    global machineState
+                                    global machineState, alarmdesc
                                     remoteState = "error"
                                     opcua_remoteState.set_value(remoteState)
-                                    global alarmdesc
                                     alarmdesc = "you have configure the device first!"
                             else:
-                                alarmdesc = "                                   "
+                                alarmdesc = "                                                      "
                                 if changecmd == "cfg1":
                                     choice = "config0"
                                     check = "y"
@@ -485,6 +414,8 @@ def open_new_window():
                                     choice = "config2"
                                     check = "y"
                                     combobox_callback(choice)
+                                elif changecmd == "reset":
+                                    resetbut()
                         else:
                             remoteState = "error"
                             opcua_remoteState.set_value(remoteState)
